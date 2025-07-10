@@ -1,8 +1,8 @@
-import dbconnect from "@/lib/dbconnect";
+import dbconnect, { collectionNames } from "@/lib/dbconnect";
 import { revalidatePath } from "next/cache";
 
 export async function GET() {
-  const data = await dbconnect("collection").find().toArray();
+  const data = await dbconnect(collectionNames.COLLECTION).find().toArray();
 
   return Response.json(data);
 }
