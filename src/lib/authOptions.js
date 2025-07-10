@@ -1,5 +1,7 @@
 import dbconnect, { collectionNames } from "@/lib/dbconnect";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
+import GitHubProvider from "next-auth/providers/github";
 
 export const authOptions = {
   providers: [
@@ -20,7 +22,9 @@ export const authOptions = {
         // Add logic here to look up the user from the credentials supplied
         // const user = { id: "1", name: "J Smith", email: "jsmith@example.com" };
         const { username, password } = credentials;
-        const user = await dbconnect(collectionNames.TEST_USER).findOne({ username });
+        const user = await dbconnect(collectionNames.TEST_USER).findOne({
+          username,
+        });
         const isPasswordOk = password === user.password;
         if (isPasswordOk) {
           // Any object returned will be saved in `user` property of the JWT
@@ -33,8 +37,36 @@ export const authOptions = {
         }
       },
     }),
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    }),
+    GitHubProvider({
+      clientId: process.env.GITHUB_ID,
+      clientSecret: process.env.GITHUB_SECRET,
+    }),
   ],
   callbacks: {
+    async signIn({ user, account, profile, email, credentials }) {
+      if (account) {
+        try {
+          const { providerAccountId, provider } = account;
+          const { email: user_email, image } = user;
+          const payload = { providerAccountId, provider, user_email, image };
+          console.log(payload);
+          const userCollection = dbconnect(collectionNames.TEST_USER);
+          const isUserExist = await userCollection.findOne({
+            providerAccountId,
+          });
+          if (!isUserExist) {
+            await userCollection.insertOne(payload);
+          }
+        } catch (err) {
+          console.log(err);
+        }
+      }
+      return true;
+    },
     async session({ session, token, user }) {
       if (token) {
         session.user.username = token.username;

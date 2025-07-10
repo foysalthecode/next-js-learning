@@ -1,4 +1,5 @@
 import LoginButton from "@/components/LoginButton";
+import LogoutButton from "@/components/LogoutButton";
 import UserInfo from "@/components/UserInfo";
 import { authOptions } from "@/lib/authOptions";
 import { getServerSession } from "next-auth";
@@ -54,7 +55,11 @@ export default async function Home() {
           >
             Read our docs
           </a>
-          <LoginButton></LoginButton>
+          {session?.user ? (
+            <LogoutButton></LogoutButton>
+          ) : (
+            <LoginButton></LoginButton>
+          )}
         </div>
         <p className="font-bold text-xl">from client</p>
         <UserInfo></UserInfo>
