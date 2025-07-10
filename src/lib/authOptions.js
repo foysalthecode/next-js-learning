@@ -52,7 +52,13 @@ export const authOptions = {
         try {
           const { providerAccountId, provider } = account;
           const { email: user_email, image } = user;
-          const payload = { providerAccountId, provider, user_email, image };
+          const payload = {
+            role: "user",
+            providerAccountId,
+            provider,
+            user_email,
+            image,
+          };
           console.log(payload);
           const userCollection = dbconnect(collectionNames.TEST_USER);
           const isUserExist = await userCollection.findOne({
@@ -63,6 +69,7 @@ export const authOptions = {
           }
         } catch (err) {
           console.log(err);
+          return false;
         }
       }
       return true;
